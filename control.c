@@ -1,30 +1,43 @@
 #include "control.h"
 
 void crea() {//create
-  printf("Creation has initiated\n");
-  int semd = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0644);//creates
-  if (semd == -1) {//error handling
+  printf("Creation initiated\n");
+  int semid = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0644);//creates
+  if (semid == -1) {//error handling
     printf("error %d: %s\n", errno, strerror(errno));
-    semd = semget(KEY, 1, 0);
-    semctl(semd, 0, GETVAL, 0);
-    printf("semctl returned: %d\n", v);
+    semid = semget(KEY, 1, 0);
+    printf("semctl returned: %d\n", semctl(semid, 0, GETVAL, 0));
   }
   else {
     union semun us;
     us.val = 1;
-    semctl(semd, 0, SETVAL, us);
+    semctl(semid, 0, SETVAL, us);
   }
   //create shared mem and file
-  int shmd;
   char * data;
   char input[3];
-  shmd = shmget(KEY, SEG_SIZE, IPC_CREAT | 0644);
-  data = shmat(shmd, 0, 0);
-  FILE *f = fopen("telephone.txt", w);
+  int shmid = shmget(KEY, SEG_SIZE, IPC_CREAT | 0644);
+  data = shmat(shmid, 0, 0);
+  file = fopen("telephone.txt", "w+");
+  int fildes = open(file,O_CREAT | O_TRUNC | O_RDWR, 0644);
   printf("Creation complete\n");
 }
 void remv() {//remove
+  printf("Current story:\n");
+  //reading story
+  int fildes = open(file,O_RDONLY);
+  char buf[SEG_SIZE];
+  read(fildes,buf,SEG_SIZE);
+  printf("%s\n",buf);
+  close(fildes);
 
+  printf("Removal initiated\n");
+  int semid = semget(KEY,1,0);
+  semctl(semid,IPC_RMID,0);//sema removed
+  //rem shared mem
+  int shmid = shmget(KEY,1,0);
+  shmctl(shmid,IPC_RMID,0);
+  printf("Removal complete\n");
 }
 void view() {//view
 

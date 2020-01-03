@@ -4,12 +4,16 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
 
 
 #define KEY 69420
 #define SEG_SIZE 200
+
+FILE *file;
 
 union semun {
       int              val;    /* Value for SETVAL */
