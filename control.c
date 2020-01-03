@@ -3,6 +3,7 @@
 void crea() {//create
   printf("Creation initiated\n");
   int semid = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0644);//creates
+  //printf("semid: %d\n",semid);
   if (semid == -1) {//error handling
     printf("error %d: %s\n", errno, strerror(errno));
     semid = semget(KEY, 1, 0);
@@ -40,20 +41,32 @@ void remv() {//remove
   printf("Removal complete\n");
 }
 void view() {//view
-
+  printf("Viewing current story:\n");
+  int fildes = open(file,O_RDONLY);
+  char buf[SEG_SIZE];
+  read(fildes,buf,SEG_SIZE);
+  printf("%s\n",buf);
+  close(fildes);
 }
 
 int main(int argc, char **argv) {
-  if(strcmp(argv[1],"-c")) {
+  if(argc != 2) {
+    printf("wrong command line args provided! please provide either -c, -r, -v");
+    return 0;
+  }
+  if(strcmp(argv[1],"-c") == 0) {
     crea();
+    return 0;
   }
-  else if(strcmp(argv[1],"-r")) {
+  else if(strcmp(argv[1],"-r") == 0) {
     remv();
+    return 0;
   }
-  else if(strcmp(argv[1],"-v")) {
+  else if(strcmp(argv[1],"-v") == 0) {
     view();
+    return 0;
   }
-  else {//no args
-    printf("no command line args provided! please provide either -c, -r, -v");
+  else {
+    return 0;
   }
 }
